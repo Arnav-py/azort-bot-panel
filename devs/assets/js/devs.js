@@ -34,11 +34,10 @@ async function loadClients() {
     body.innerHTML = clients.map(c => `
       <tr>
         <td><strong>${c.username}</strong></td>
-        <td>
-          <div>${c.botName}</div>
-          <div>${(c.bots || []).length} server${(c.bots || []).length === 1 ? '' : 's'}</div>
-          <div class="mono" style="color:var(--text-dim); font-size:11.5px;">${(c.bots || []).map(bot => bot.serverId).join(', ') || '—'}</div>
-        </td>
+        <td><div class="client-server-list">${(c.bots || []).map(bot => `
+          <button class="admin-server-card" data-server="${encodeURIComponent(JSON.stringify({ ...bot, clientName: c.username }))}">
+            <span><strong>${bot.name}</strong><span>${bot.status || 'offline'} · ${bot.plan || 'Standard'}</span></span><b class="admin-server-arrow">&rarr;</b>
+          </button>`).join('') || '<span>—</span>'}</div></td>
         <td><span class="badge ${c.status === 'active' ? 'active' : 'expired'}">${c.status === 'active' ? 'Active' : 'Expired'}</span></td>
         <td>${fmtDate(c.expiresAt)}</td>
         <td>${c.lastLogin ? fmtDate(c.lastLogin) : 'Never'}</td>
@@ -55,10 +54,37 @@ async function loadClients() {
       btn.addEventListener('click', () => openModal(btn.dataset.edit)));
     body.querySelectorAll('[data-reset]').forEach(btn =>
       btn.addEventListener('click', () => resetPassword(btn.dataset.reset)));
+    body.querySelectorAll('[data-server]').forEach(btn =>
+      btn.addEventListener('click', () => openServerDetail(JSON.parse(decodeURIComponent(btn.dataset.server)))));
 
   } catch (e) {
     body.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:30px;">Couldn't load clients.</td></tr>`;
   }
+}
+
+function openServerDetail(bot) {
+  document.getElementById('adminDetailName').textContent = bot.name || 'Server';
+  document.getElementById('adminDetailClient').textContent = bot.clientName || '—';
+  document.getElementById('adminDetailExpiry').textContent = fmtDate(bot.expiresAt);
+  document.getElementById('adminDetailId').textContent = bot.serverId || '—';
+  document.getElementById('adminDetailPlan').textContent = bot.plan || 'Standard';
+  document.getElementById('adminDetailCpu').textContent = bot.cpuLimit ? `${bot.cpuLimit}%` : '—';
+  document.getElementById('adminDetailMemory').textContent = bot.memLimit ? `${bot.memLimit} MB` : '—';
+  document.getElementById('adminDetailAction').textContent = bot.lastAction || 'None yet';
+  document.getElementById('adminDetailAccess').textContent = bot.status === 'suspended' ? 'Suspended' : 'Active';
+  document.getElementById('adminDetailStatus').textContent = bot.status === 'online' ? 'Online' : bot.status === 'restarting' ? 'Restarting' : 'Offline';
+  document.getElementById('adminDetailStatus').className = `status-text ${bot.status === 'online' ? 'online' : bot.status === 'restarting' ? 'restarting' : 'offline'}`;
+  renderAdminPulse(bot.status);
+  document.getElementById('serverDetailOverlay').classList.add('show');
+}
+
+function renderAdminPulse(status) {
+  const pulse = document.getElementById('adminDetailPulse');
+  pulse.className = `pulse ${status === 'online' ? '' : status === 'restarting' ? 'restarting' : 'offline'}`;
+}
+
+function closeServerDetail() {
+  document.getElementById('serverDetailOverlay').classList.remove('show');
 }
 
 function openModal(clientId = null) {
@@ -148,6 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modalClose').addEventListener('click', closeModal);
   document.getElementById('overlay').addEventListener('click', (e) => {
     if (e.target.id === 'overlay') closeModal();
+  });
+  document.getElementById('serverDetailClose').addEventListener('click', closeServerDetail);
+  document.getElementById('serverDetailOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'serverDetailOverlay') closeServerDetail();
   });
   document.getElementById('clientForm').addEventListener('submit', saveClient);
   document.getElementById('logoutBtn').addEventListener('click', async () => {

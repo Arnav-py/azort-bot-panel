@@ -23,6 +23,16 @@
   .assignment-heading{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
   .assignment-row{ display:grid; grid-template-columns:1fr 1.25fr 150px auto; gap:8px; align-items:end; margin-bottom:10px; }
   .assignment-row input{ width:100%; }
+  .client-server-list{ display:grid; gap:8px; min-width:280px; }
+  .admin-server-card{ display:flex; align-items:center; justify-content:space-between; gap:18px; width:100%; padding:12px 14px; text-align:left; color:var(--text); background:linear-gradient(105deg, rgba(18,26,51,.92), rgba(13,19,38,.92)); border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:transform .2s, border-color .2s, box-shadow .2s; }
+  .admin-server-card:hover{ transform:translateX(4px); border-color:var(--cyan); box-shadow:0 8px 24px rgba(0,0,0,.3), 0 0 18px rgba(71,214,255,.12); }
+  .admin-server-card strong{ display:block; font-size:13px; }
+  .admin-server-card span{ display:block; color:var(--text-dim); font-size:11px; margin-top:4px; }
+  .admin-server-arrow{ color:var(--cyan); font-size:18px; }
+  .admin-detail-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px; }
+  .admin-detail-item{ padding:18px; background:var(--panel); border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 26px rgba(0,0,0,.2); }
+  .admin-detail-item strong{ display:block; font-size:20px; margin-top:8px; }
+  @media (max-width:700px){ .admin-detail-grid{ grid-template-columns:1fr 1fr; } }
 </style>
 </head>
 <body>
@@ -74,6 +84,26 @@
     </div>
   </div>
 
+</div>
+
+<div class="overlay detail-overlay" id="serverDetailOverlay">
+  <div class="drawer">
+    <div class="drawer-top">
+      <div><div class="section-label">Server workspace</div><h3 id="adminDetailName">Server</h3></div>
+      <button class="drawer-close" id="serverDetailClose">&times;</button>
+    </div>
+    <div class="status-row"><div class="pulse offline" id="adminDetailPulse"><div class="pulse-ring"></div><div class="pulse-ring"></div><div class="pulse-dot"></div></div><span class="status-text offline" id="adminDetailStatus">Offline</span><span class="drawer-live-label">Assignment status</span></div>
+    <p class="drawer-description">Server assignment and capacity details for this client.</p>
+    <div class="bot-meta"><span>Client <strong id="adminDetailClient">-</strong></span><span>Expires <strong id="adminDetailExpiry">-</strong></span></div>
+    <div class="admin-detail-grid">
+      <div class="admin-detail-item"><span class="section-label">Server ID</span><strong class="mono" id="adminDetailId">-</strong></div>
+      <div class="admin-detail-item"><span class="section-label">Plan</span><strong id="adminDetailPlan">-</strong></div>
+      <div class="admin-detail-item"><span class="section-label">CPU limit</span><strong id="adminDetailCpu">-</strong></div>
+      <div class="admin-detail-item"><span class="section-label">Memory limit</span><strong id="adminDetailMemory">-</strong></div>
+      <div class="admin-detail-item"><span class="section-label">Last action</span><strong id="adminDetailAction">-</strong></div>
+      <div class="admin-detail-item"><span class="section-label">Access</span><strong id="adminDetailAccess">-</strong></div>
+    </div>
+  </div>
 </div>
 
 <!-- Add / Edit client modal -->

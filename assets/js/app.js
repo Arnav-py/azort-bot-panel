@@ -73,7 +73,7 @@ async function loadBots() {
         <div class="bot-card-top">
           <div>
             <div class="bot-name">${bot.name}</div>
-            <div class="bot-id mono">${bot.serverId}</div>
+            <div class="bot-id">Hosted server workspace</div>
           </div>
         </div>
         <div class="status-row">

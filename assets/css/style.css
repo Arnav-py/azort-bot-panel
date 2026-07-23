@@ -40,7 +40,23 @@
 
 *{ box-sizing:border-box; }
 
+html, body{
+  -webkit-tap-highlight-color:transparent;
+  -webkit-touch-callout:none;
+}
+
+body{
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+input, textarea, [contenteditable="true"]{
+  -webkit-user-select:text;
+  user-select:text;
+}
+
 button, input, select, textarea{ outline:none; }
+button:focus, input:focus, select:focus, textarea:focus{ outline:none !important; }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
   outline:2px solid var(--cyan);
   outline-offset:3px;

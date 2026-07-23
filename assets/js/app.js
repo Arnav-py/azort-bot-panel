@@ -18,6 +18,22 @@ function fmtDate(iso) {
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+function fmtBytes(bytes) {
+  if (!bytes) return '0 MB';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let value = bytes;
+  let index = 0;
+  while (value >= 1024 && index < units.length - 1) { value /= 1024; index += 1; }
+  return `${value >= 10 || index === 0 ? Math.round(value) : value.toFixed(1)} ${units[index]}`;
+}
+
+function fmtUptime(ms) {
+  if (!ms) return '—';
+  const hours = Math.floor(ms / 3600000);
+  const minutes = Math.floor((ms % 3600000) / 60000);
+  return hours ? `${hours}h ${minutes}m` : `${minutes}m`;
+}
+
 function statusLabel(status) {
   if (status === 'online') return 'Online';
   if (status === 'restarting') return 'Restarting…';
@@ -70,7 +86,7 @@ async function loadBots() {
         </div>
         <div class="bot-meta">
           <span>Expires ${fmtDate(bot.expiresAt)}</span>
-          <span>${bot.plan || 'Standard'}</span>
+          <span>${bot.details?.node || bot.plan || 'Standard'}</span>
         </div>
       </div>
     `).join('');
@@ -95,9 +111,21 @@ function openDrawer(botId) {
   document.getElementById('drawerName').textContent = bot.name;
   document.getElementById('drawerId').textContent = bot.serverId;
   document.getElementById('drawerExpiry').textContent = fmtDate(bot.expiresAt);
-  document.getElementById('drawerCpu').textContent = bot.cpuLimit ? `${bot.cpuLimit}%` : '—';
-  document.getElementById('drawerMem').textContent = bot.memLimit ? `${bot.memLimit} MB` : '—';
   document.getElementById('drawerLastAction').textContent = bot.lastAction || 'None yet';
+  const details = bot.details || {};
+  document.getElementById('drawerDescription').textContent = details.description || 'No server description available.';
+  document.getElementById('drawerNode').textContent = details.node || '—';
+  document.getElementById('drawerAllocation').textContent = details.allocation || '—';
+  document.getElementById('drawerUptime').textContent = fmtUptime(details.uptime);
+  document.getElementById('drawerCpuUsed').textContent = details.cpuUsed ? `${details.cpuUsed.toFixed(1)}%` : '—';
+  document.getElementById('drawerCpuLimit').textContent = details.cpuLimit ? `${details.cpuLimit}% limit` : `${bot.cpuLimit || '—'}% limit`;
+  document.getElementById('drawerMemUsed').textContent = details.memoryUsed ? fmtBytes(details.memoryUsed) : '—';
+  document.getElementById('drawerMemLimit').textContent = details.memoryLimit ? `${fmtBytes(details.memoryLimit * 1024 * 1024)} limit` : `${bot.memLimit || '—'} MB limit`;
+  document.getElementById('drawerDiskUsed').textContent = details.diskUsed ? fmtBytes(details.diskUsed) : '—';
+  document.getElementById('drawerDiskLimit').textContent = details.diskLimit ? `${fmtBytes(details.diskLimit * 1024 * 1024)} limit` : '—';
+  ['startBtn', 'restartBtn', 'stopBtn'].forEach(id => { document.getElementById(id).disabled = false; });
+  document.getElementById('startBtn').disabled = bot.status === 'online';
+  document.getElementById('stopBtn').disabled = bot.status === 'offline';
   document.getElementById('drawerStatusText').textContent = statusLabel(bot.status);
   document.getElementById('drawerStatusText').className = `status-text ${bot.status}`;
   renderPulse(document.getElementById('drawerPulse'), bot.status);
@@ -113,10 +141,8 @@ function closeDrawer() {
 
 async function sendAction(action) {
   if (!activeBotId) return;
-  const restartBtn = document.getElementById('restartBtn');
-  const stopBtn = document.getElementById('stopBtn');
-  restartBtn.disabled = true;
-  stopBtn.disabled = true;
+  const actionButtons = ['startBtn', 'restartBtn', 'stopBtn'].map(id => document.getElementById(id));
+  actionButtons.forEach(button => { button.disabled = true; });
 
   try {
     const res = await fetch('/api/bot-action', {
@@ -133,15 +159,14 @@ async function sendAction(action) {
     } else if (!res.ok) {
       showToast(data.error || 'Action failed', 'err');
     } else {
-      showToast(`${action === 'restart' ? 'Restart' : 'Stop'} signal sent`, 'ok');
+      showToast(`${action[0].toUpperCase() + action.slice(1)} signal sent`, 'ok');
       closeDrawer();
       loadBots();
     }
   } catch (e) {
     showToast('Network error — try again', 'err');
   } finally {
-    restartBtn.disabled = false;
-    stopBtn.disabled = false;
+    actionButtons.forEach(button => { button.disabled = false; });
   }
 }
 
@@ -151,12 +176,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('overlay');
   const drawerClose = document.getElementById('drawerClose');
   const restartBtn = document.getElementById('restartBtn');
+  const startBtn = document.getElementById('startBtn');
   const stopBtn = document.getElementById('stopBtn');
   const logoutBtn = document.getElementById('logoutBtn');
 
   if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
   if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDrawer(); });
   if (restartBtn) restartBtn.addEventListener('click', () => sendAction('restart'));
+  if (startBtn) startBtn.addEventListener('click', () => sendAction('start'));
   if (stopBtn) stopBtn.addEventListener('click', () => sendAction('stop'));
   if (logoutBtn) logoutBtn.addEventListener('click', async () => {
     await fetch('/api/logout', { method: 'POST' });

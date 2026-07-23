@@ -36,7 +36,8 @@ async function loadClients() {
         <td><strong>${c.username}</strong></td>
         <td>
           <div>${c.botName}</div>
-          <div class="mono" style="color:var(--text-dim); font-size:11.5px;">${c.serverId}</div>
+          <div>${(c.bots || []).length} server${(c.bots || []).length === 1 ? '' : 's'}</div>
+          <div class="mono" style="color:var(--text-dim); font-size:11.5px;">${(c.bots || []).map(bot => bot.serverId).join(', ') || '—'}</div>
         </td>
         <td><span class="badge ${c.status === 'active' ? 'active' : 'expired'}">${c.status === 'active' ? 'Active' : 'Expired'}</span></td>
         <td>${fmtDate(c.expiresAt)}</td>
@@ -70,15 +71,16 @@ function openModal(clientId = null) {
     document.getElementById('modalTitle').textContent = 'Edit client';
     document.getElementById('clientId').value = c.id;
     document.getElementById('cUsername').value = c.username;
-    document.getElementById('cBotName').value = c.botName;
-    document.getElementById('cServerId').value = c.serverId;
-    document.getElementById('cExpiry').value = c.expiresAt ? c.expiresAt.split('T')[0] : '';
+    document.getElementById('serverAssignments').innerHTML = '';
+    (c.bots || []).forEach(bot => addAssignmentRow(bot));
     document.getElementById('cStatus').value = c.status;
     document.getElementById('tempPassWrap').style.display = 'none';
   } else {
     document.getElementById('modalTitle').textContent = 'Add client';
     document.getElementById('clientId').value = '';
     document.getElementById('tempPassWrap').style.display = 'block';
+    document.getElementById('serverAssignments').innerHTML = '';
+    addAssignmentRow();
   }
 
   overlay.classList.add('show');
@@ -94,9 +96,7 @@ async function saveClient(e) {
   const payload = {
     id: id || undefined,
     username: document.getElementById('cUsername').value.trim(),
-    botName: document.getElementById('cBotName').value.trim(),
-    serverId: document.getElementById('cServerId').value.trim(),
-    expiresAt: document.getElementById('cExpiry').value || null,
+    bots: readAssignments(),
     status: document.getElementById('cStatus').value,
     tempPassword: document.getElementById('cTempPass').value || undefined
   };
@@ -154,4 +154,31 @@ document.addEventListener('DOMContentLoaded', () => {
     await fetch('/api/devs-logout', { method: 'POST' });
     window.location.href = '/devs/index.html';
   });
+  document.getElementById('addServerBtn').addEventListener('click', () => addAssignmentRow());
 });
+
+function addAssignmentRow(bot = {}) {
+  const row = document.createElement('div');
+  row.className = 'assignment-row';
+  row.innerHTML = `
+    <input type="hidden" class="assignment-id" value="${bot.id || ''}">
+    <input class="assignment-name" required placeholder="Display name" value="${bot.name || ''}">
+    <input class="assignment-server mono" required placeholder="Pterodactyl server ID" value="${bot.serverId || ''}">
+    <input class="assignment-expiry" type="date" value="${bot.expiresAt ? bot.expiresAt.split('T')[0] : ''}">
+    <button type="button" class="btn-ghost assignment-remove" aria-label="Remove server">Remove</button>`;
+  row.querySelector('.assignment-remove').addEventListener('click', () => {
+    const rows = document.querySelectorAll('.assignment-row');
+    if (rows.length === 1) return showToast('A client needs at least one server', 'err');
+    row.remove();
+  });
+  document.getElementById('serverAssignments').appendChild(row);
+}
+
+function readAssignments() {
+  return [...document.querySelectorAll('.assignment-row')].map(row => ({
+    id: row.querySelector('.assignment-id').value || undefined,
+    name: row.querySelector('.assignment-name').value.trim(),
+    serverId: row.querySelector('.assignment-server').value.trim(),
+    expiresAt: row.querySelector('.assignment-expiry').value || null,
+  }));
+}

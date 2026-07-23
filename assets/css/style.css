@@ -274,6 +274,17 @@ h1,h2,h3,h4{
   color:var(--text-muted);
 }
 
+.drawer-description{ color:var(--text-muted); font-size:13px; line-height:1.6; margin:18px 0 0; }
+.drawer-live-label{ color:var(--text-dim); font-size:11px; margin-left:auto; text-transform:uppercase; letter-spacing:.08em; }
+.server-facts{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:22px; }
+.server-facts > div, .resource-card, .drawer-history{ background:var(--panel-alt); border:1px solid var(--border); border-radius:10px; padding:13px; }
+.server-facts .section-label, .resource-card .section-label, .drawer-history .section-label{ display:block; margin-bottom:8px; }
+.server-facts strong, .resource-card strong, .drawer-history strong{ display:block; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.resource-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px; }
+.resource-card span{ display:block; color:var(--text-dim); font-size:11px; margin-top:5px; }
+.drawer-history{ margin-top:10px; }
+@media (max-width:520px){ .server-facts, .resource-grid{ grid-template-columns:1fr; } .drawer-live-label{ display:none; } }
+
 .status-text.online{ color:var(--ok); }
 .status-text.offline{ color:var(--text-dim); }
 .status-text.restarting{ color:var(--warn); }

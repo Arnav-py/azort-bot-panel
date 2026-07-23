@@ -1,7 +1,7 @@
 const { readJSON, writeJSON, readSessionCookie, checkCooldown, setCooldown } = require('../lib/store');
 const { sendPowerSignal } = require('../lib/pterodactyl');
 
-const ALLOWED_ACTIONS = { restart: 'restart', stop: 'stop' };
+const ALLOWED_ACTIONS = { start: 'start', restart: 'restart', stop: 'stop' };
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -42,8 +42,9 @@ module.exports = async (req, res) => {
   setCooldown(cooldownKey);
 
   // Update last-action record (see note in lib/store.js re: persistent storage on Vercel)
-  bot.lastAction = `${action === 'restart' ? 'Restart' : 'Stop'} — ${new Date().toISOString()}`;
-  bot.status = action === 'restart' ? 'restarting' : 'offline';
+  const actionLabel = action[0].toUpperCase() + action.slice(1);
+  bot.lastAction = `${actionLabel} — ${new Date().toISOString()}`;
+  bot.status = action === 'stop' ? 'offline' : 'restarting';
   await writeJSON('bots.json', bots);
 
   return res.status(200).json({ ok: true });

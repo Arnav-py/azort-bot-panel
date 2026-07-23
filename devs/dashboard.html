@@ -20,6 +20,9 @@
   .modal-grid .field{ margin-bottom:14px; }
   .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .add-bar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .assignment-heading{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
+  .assignment-row{ display:grid; grid-template-columns:1fr 1.25fr 150px auto; gap:8px; align-items:end; margin-bottom:10px; }
+  .assignment-row input{ width:100%; }
 </style>
 </head>
 <body>
@@ -57,7 +60,7 @@
         <thead>
           <tr>
             <th>Client</th>
-            <th>Bot / Server ID</th>
+            <th>Assigned servers</th>
             <th>Status</th>
             <th>Expires</th>
             <th>Last login</th>
@@ -90,19 +93,15 @@
       </div>
 
       <div class="field">
-        <label>Bot / display name</label>
-        <input type="text" id="cBotName" required placeholder="e.g. Nifty Exchanges Bot">
-      </div>
-
-      <div class="field">
-        <label>Orihost server ID</label>
-        <input type="text" id="cServerId" required placeholder="Pterodactyl server identifier">
+        <div class="assignment-heading"><label>Server assignments</label><button type="button" class="btn-ghost" id="addServerBtn">+ Add server</button></div>
+        <p class="form-note">A client can have multiple Orihost servers. Each server gets its own name, ID, and expiry.</p>
+        <div id="serverAssignments"></div>
       </div>
 
       <div class="two-col">
         <div class="field">
-          <label>Access expires</label>
-          <input type="date" id="cExpiry">
+          <label>Access</label>
+          <div class="form-note" style="margin:0;padding-top:12px">Expiry is set per server assignment.</div>
         </div>
         <div class="field">
           <label>Status</label>

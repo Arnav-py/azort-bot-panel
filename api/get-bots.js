@@ -1,5 +1,5 @@
 const { readJSON, readSessionCookie } = require('../lib/store');
-const { getServerStatus } = require('../lib/pterodactyl');
+const { getServerStatus, getServerDetails } = require('../lib/pterodactyl');
 
 module.exports = async (req, res) => {
   const session = readSessionCookie(req, 'azort_session');
@@ -26,7 +26,13 @@ module.exports = async (req, res) => {
     } catch {
       // fall back to last known status rather than erroring the whole dashboard
     }
-    return { ...bot, status };
+    let details = null;
+    try {
+      details = await getServerDetails(bot.serverId);
+    } catch {
+      // Keep the local assignment usable when the panel metadata request fails.
+    }
+    return { ...bot, status, details };
   }));
 
   return res.status(200).json({

@@ -13,12 +13,6 @@ function requireAdmin(req, res) {
   return session;
 }
 
-// NOTE: this endpoint models "one client = one user + one primary bot" for
-// simplicity, matching the add/edit form in the devs dashboard. If a client
-// ever needs more than one bot, extend the bots.json filter below rather
-// than changing this shape - a user can already own multiple entries in
-// bots.json.
-
 module.exports = async (req, res) => {
   const session = requireAdmin(req, res);
   if (!session) return;
@@ -28,14 +22,16 @@ module.exports = async (req, res) => {
 
   if (req.method === 'GET') {
     const clients = users.map(u => {
-      const bot = bots.find(b => b.userId === u.id);
+      const clientBots = bots.filter(b => b.userId === u.id);
+      const firstBot = clientBots[0];
       return {
         id: u.id,
         username: u.username,
-        botName: bot?.name || '—',
-        serverId: bot?.serverId || '—',
-        expiresAt: bot?.expiresAt || null,
-        status: bot?.status === 'suspended' ? 'expired' : (u.suspended ? 'expired' : 'active'),
+        bots: clientBots,
+        botName: firstBot?.name || '—',
+        serverId: firstBot?.serverId || '—',
+        expiresAt: firstBot?.expiresAt || null,
+        status: firstBot?.status === 'suspended' ? 'expired' : (u.suspended ? 'expired' : 'active'),
         lastLogin: u.lastLogin || null,
       };
     });
@@ -43,9 +39,10 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    const { username, botName, serverId, expiresAt, tempPassword } = req.body || {};
-    if (!username || !botName || !serverId) {
-      return res.status(400).json({ error: 'Username, bot name, and server ID are required.' });
+    const { username, bots: submittedBots, botName, serverId, expiresAt, tempPassword } = req.body || {};
+    const clientBots = Array.isArray(submittedBots) ? submittedBots : [{ name: botName, serverId, expiresAt }];
+    if (!username || !clientBots.length || clientBots.some(bot => !bot?.name || !bot?.serverId)) {
+      return res.status(400).json({ error: 'Username and at least one bot with a name and server ID are required.' });
     }
     if (users.some(u => u.username.toLowerCase() === String(username).toLowerCase())) {
       return res.status(409).json({ error: 'That username is already in use.' });
@@ -53,26 +50,18 @@ module.exports = async (req, res) => {
 
     const plainPass = tempPassword || genTempPassword();
     const userId = 'u_' + crypto.randomBytes(5).toString('hex');
-    const botId = 'b_' + crypto.randomBytes(5).toString('hex');
-
     users.push({
       id: userId,
       username,
       passwordHash: hashPassword(plainPass),
       displayName: username,
     });
-    bots.push({
-      id: botId,
-      userId,
-      name: botName,
-      serverId,
-      plan: 'Standard',
-      expiresAt: expiresAt || null,
-      cpuLimit: 100,
-      memLimit: 512,
-      status: 'offline',
-      lastAction: null,
-    });
+    clientBots.forEach(bot => bots.push({
+      id: 'b_' + crypto.randomBytes(5).toString('hex'), userId, name: bot.name,
+      serverId: bot.serverId, plan: bot.plan || 'Standard', expiresAt: bot.expiresAt || null,
+      cpuLimit: bot.cpuLimit || 100, memLimit: bot.memLimit || 512,
+      status: 'offline', lastAction: null,
+    }));
 
     await writeJSON('users.json', users);
     await writeJSON('bots.json', bots);
@@ -81,16 +70,32 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'PUT') {
-    const { id, botName, serverId, expiresAt, status } = req.body || {};
+    const { id, bots: submittedBots, botName, serverId, expiresAt, status } = req.body || {};
     const user = users.find(u => u.id === id);
     if (!user) return res.status(404).json({ error: 'Client not found.' });
 
-    const bot = bots.find(b => b.userId === id);
-    if (bot) {
-      if (botName) bot.name = botName;
-      if (serverId) bot.serverId = serverId;
-      bot.expiresAt = expiresAt || null;
+    const clientBots = Array.isArray(submittedBots) ? submittedBots : [{ name: botName, serverId, expiresAt }];
+    if (!clientBots.length || clientBots.some(bot => !bot?.name || !bot?.serverId)) {
+      return res.status(400).json({ error: 'At least one bot with a name and server ID is required.' });
     }
+    const existingBots = bots.filter(bot => bot.userId === id);
+    const replacementBots = clientBots.map(bot => {
+      const existingBot = bot.id ? existingBots.find(candidate => candidate.id === bot.id) : null;
+      return ({
+        ...(existingBot || {}),
+        id: bot.id || 'b_' + crypto.randomBytes(5).toString('hex'),
+        userId: id, name: bot.name, serverId: bot.serverId,
+        plan: bot.plan || existingBot?.plan || 'Standard',
+        expiresAt: bot.expiresAt || null,
+        cpuLimit: bot.cpuLimit || existingBot?.cpuLimit || 100,
+        memLimit: bot.memLimit || existingBot?.memLimit || 512,
+        status: existingBot?.status || 'offline',
+        lastAction: existingBot?.lastAction || null,
+      });
+    });
+    const remainingBots = bots.filter(bot => bot.userId !== id);
+    bots.length = 0;
+    bots.push(...remainingBots, ...replacementBots);
     user.suspended = status === 'expired';
 
     await writeJSON('users.json', users);

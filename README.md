@@ -24,6 +24,8 @@ without a database or always-on server.
   bot-action.js                  → restart/stop, with authorization + cooldown
   devs-login.js / devs-logout.js → admin auth
   devs-clients.js                → admin CRUD (list/add/edit/reset password)
+  admin-tools.js                 → admin operations, bulk tools, announcements, audit, maintenance
+  announcements.js               → authenticated client announcements + dismissal
 
 /lib
   store.js         → JSON storage, password hashing, signed sessions, cooldowns
@@ -33,6 +35,9 @@ without a database or always-on server.
   users.json    → client accounts (username + password hash)
   bots.json     → user → server ID mapping (the authorization boundary)
   admins.json   → your own devs login
+  announcements.json → global client announcements
+  admin-settings.json → maintenance mode and message
+  audit-log.json → admin activity history
 
 /scripts
   set-password.js    → Set an account password without handling hashes
@@ -65,8 +70,9 @@ without a database or always-on server.
    Project Settings → Environment Variables.
 
 On the first deployment with Upstash configured, copy the contents of
-`data/admins.json`, `data/users.json`, and `data/bots.json` into the matching
-Redis keys `azort:admins.json`, `azort:users.json`, and `azort:bots.json`.
+`data/admins.json`, `data/users.json`, `data/bots.json`, `data/announcements.json`,
+`data/admin-settings.json`, and `data/audit-log.json` into the matching Redis
+keys with the `azort:` prefix.
 The application reads those keys in production and uses local JSON files only
 when the Redis variables are absent.
 

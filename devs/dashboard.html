@@ -33,6 +33,31 @@
   .admin-detail-item{ padding:18px; background:var(--panel); border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 26px rgba(0,0,0,.2); }
   .admin-detail-item strong{ display:block; font-size:20px; margin-top:8px; }
   @media (max-width:700px){ .admin-detail-grid{ grid-template-columns:1fr 1fr; } }
+  .admin-overview{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+  .admin-stat{ padding:18px; background:linear-gradient(145deg,rgba(18,26,51,.96),rgba(13,19,38,.96)); border:1px solid var(--border); border-radius:12px; box-shadow:0 14px 35px rgba(0,0,0,.25); }
+  .admin-stat strong{ display:block; font-size:27px; color:var(--text); margin-top:6px; }
+  .admin-stat.alert strong{ color:var(--warn); text-shadow:0 0 18px rgba(255,184,79,.3); }
+  .admin-tools-grid{ display:grid; grid-template-columns:1.15fr .85fr; gap:14px; margin-bottom:18px; }
+  .admin-tool-panel{ padding:20px; background:var(--panel); border:1px solid var(--border); border-radius:14px; box-shadow:0 16px 40px rgba(0,0,0,.2); }
+  .admin-tool-panel h3{ font-size:17px; margin-bottom:5px; }
+  .tool-form{ display:grid; gap:10px; margin-top:16px; }
+  .tool-form input,.tool-form textarea,.tool-form select{ width:100%; background:var(--bg-alt); border:1px solid var(--border); border-radius:9px; padding:11px 12px; color:var(--text); font:inherit; }
+  .tool-form textarea{ min-height:76px; resize:vertical; }
+  .tool-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .announcement-list,.audit-list,.expiry-list{ display:grid; gap:8px; margin-top:14px; max-height:230px; overflow:auto; }
+  .announcement-item,.audit-item,.expiry-item{ padding:12px; background:var(--panel-alt); border:1px solid var(--border); border-radius:10px; }
+  .announcement-item{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+  .announcement-item strong,.audit-item strong{ display:block; font-size:13px; }
+  .announcement-item p{ color:var(--text-muted); font-size:12px; line-height:1.45; margin:5px 0 0; }
+  .audit-item span,.expiry-item span{ display:block; color:var(--text-dim); font-size:11px; margin-top:4px; }
+  .toolbar-row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .toolbar-row input,.toolbar-row select{ background:var(--bg-alt); border:1px solid var(--border); border-radius:9px; padding:10px 12px; color:var(--text); font:inherit; }
+  .toolbar-search{ flex:1; min-width:220px; }
+  .bulk-bar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 12px; background:rgba(46,107,255,.08); border:1px solid rgba(46,107,255,.22); border-radius:10px; margin-bottom:14px; }
+  .bulk-bar strong{ margin-right:auto; font-size:12px; }
+  .server-select{ accent-color:var(--cyan); width:16px; height:16px; flex-shrink:0; }
+  @media (max-width:800px){ .admin-overview,.admin-tools-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:520px){ .admin-overview,.admin-tools-grid{ grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -64,7 +89,40 @@
     <button class="btn btn-primary" id="addClientBtn">+ Add client</button>
   </div>
 
+  <section class="admin-overview">
+    <div class="admin-stat"><span class="section-label">Clients</span><strong id="statClients">0</strong></div>
+    <div class="admin-stat"><span class="section-label">Servers</span><strong id="statServers">0</strong></div>
+    <div class="admin-stat"><span class="section-label">Online</span><strong id="statOnline">0</strong></div>
+    <div class="admin-stat alert"><span class="section-label">Expiring soon</span><strong id="statExpiring">0</strong></div>
+    <div class="admin-stat"><span class="section-label">Average CPU</span><strong id="statCpu">—</strong></div>
+    <div class="admin-stat"><span class="section-label">Memory in use</span><strong id="statMemory">—</strong></div>
+  </section>
+
+  <section class="admin-tools-grid">
+    <div class="admin-tool-panel">
+      <h3>Operations</h3><p class="page-sub" style="margin:0">Assign servers, export records, and control maintenance mode.</p>
+      <form class="tool-form" id="bulkAssignForm">
+        <select id="bulkClient" required><option value="">Choose a client</option></select>
+        <div class="two-col"><input id="bulkName" required placeholder="Server display name"><input id="bulkServerId" required placeholder="Pterodactyl server ID"></div>
+        <div class="two-col"><input id="bulkExpiry" type="date" placeholder="Expiry"><select id="bulkPlan"><option>Standard</option><option>Premium</option><option>Custom</option></select></div>
+        <div class="tool-actions"><button class="btn btn-primary" type="submit">Assign server</button><button class="btn-ghost" type="button" id="exportBtn">Export CSV</button><button class="btn-ghost" type="button" id="maintenanceBtn">Enable maintenance</button></div>
+      </form>
+    </div>
+    <div class="admin-tool-panel">
+      <h3>Global announcement</h3><p class="page-sub" style="margin:0">Post a notice that appears once for each client until dismissed.</p>
+      <form class="tool-form" id="announcementForm"><input id="announcementTitle" required placeholder="Announcement title"><textarea id="announcementMessage" required placeholder="Write the message clients should see..."></textarea><div class="two-col"><select id="announcementTone"><option value="info">Info</option><option value="success">Success</option><option value="warning">Warning</option><option value="critical">Critical</option></select><button class="btn btn-primary" type="submit">Publish announcement</button></div></form>
+      <div class="announcement-list" id="announcementList"></div>
+    </div>
+  </section>
+
+  <section class="admin-tools-grid">
+    <div class="admin-tool-panel"><h3>Expiry alerts</h3><div class="expiry-list" id="expiryList"></div></div>
+    <div class="admin-tool-panel"><h3>Audit activity</h3><div class="audit-list" id="auditList"></div></div>
+  </section>
+
   <div class="card">
+    <div class="toolbar-row"><input class="toolbar-search" id="clientSearch" placeholder="Search clients or servers"><select id="statusFilter"><option value="all">All access states</option><option value="active">Active</option><option value="expired">Expired</option></select></div>
+    <div class="bulk-bar"><strong><span id="selectedCount">0</span> servers selected</strong><button class="btn-ghost" id="bulkRemoveBtn" type="button">Remove selected</button></div>
     <div class="table-wrap">
       <table>
         <thead>
@@ -100,9 +158,13 @@
       <div class="admin-detail-item"><span class="section-label">Plan</span><strong id="adminDetailPlan">-</strong></div>
       <div class="admin-detail-item"><span class="section-label">CPU limit</span><strong id="adminDetailCpu">-</strong></div>
       <div class="admin-detail-item"><span class="section-label">Memory limit</span><strong id="adminDetailMemory">-</strong></div>
+      <div class="admin-detail-item"><span class="section-label">CPU usage</span><strong id="adminDetailCpuUsed">-</strong></div>
+      <div class="admin-detail-item"><span class="section-label">Memory used</span><strong id="adminDetailMemoryUsed">-</strong></div>
+      <div class="admin-detail-item"><span class="section-label">Disk used</span><strong id="adminDetailDiskUsed">-</strong></div>
       <div class="admin-detail-item"><span class="section-label">Last action</span><strong id="adminDetailAction">-</strong></div>
       <div class="admin-detail-item"><span class="section-label">Access</span><strong id="adminDetailAccess">-</strong></div>
     </div>
+    <div class="tool-form"><label class="section-label" for="adminDetailNote">Internal client note</label><textarea id="adminDetailNote" placeholder="Only admins can see this note..."></textarea><div class="tool-actions"><button class="btn btn-primary" id="adminNoteSave" type="button">Save note</button><button class="btn btn-primary" id="adminStartBtn" type="button">Start</button><button class="btn btn-primary" id="adminRestartBtn" type="button">Restart</button><button class="btn-ghost" id="adminStopBtn" type="button">Stop</button><button class="btn-ghost" id="adminKillBtn" type="button">Kill</button></div></div>
   </div>
 </div>
 

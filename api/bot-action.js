@@ -14,6 +14,10 @@ module.exports = async (req, res) => {
   if (!botId || !signal) return res.status(400).json({ error: 'Invalid request.' });
 
   const bots = await readJSON('bots.json') || [];
+  const settings = await readJSON('admin-settings.json') || {};
+  if (settings.maintenanceMode) {
+    return res.status(503).json({ error: settings.maintenanceMessage || 'Server controls are temporarily disabled.' });
+  }
   const bot = bots.find(b => b.id === botId);
 
   // CRITICAL AUTHORIZATION CHECK:

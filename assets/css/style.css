@@ -525,6 +525,18 @@ h1,h2,h3,h4{
 .toast.ok{ border-color:rgba(47,230,168,0.4); }
 .toast.err{ border-color:rgba(255,79,110,0.4); }
 
+.announcement-stack{ position:fixed; top:22px; right:22px; z-index:40; width:min(420px, calc(100vw - 44px)); display:grid; gap:10px; pointer-events:none; }
+.announcement-banner{ pointer-events:auto; padding:18px 42px 18px 18px; position:relative; background:linear-gradient(145deg,rgba(18,26,51,.98),rgba(13,19,38,.98)); border:1px solid var(--cyan); border-radius:14px; box-shadow:0 20px 55px rgba(0,0,0,.48),0 0 28px rgba(71,214,255,.18); animation:announcement-in .45s cubic-bezier(.2,.8,.2,1) both; }
+.announcement-banner.warning{ border-color:var(--warn); box-shadow:0 20px 55px rgba(0,0,0,.48),0 0 28px rgba(255,184,79,.18); }
+.announcement-banner.critical{ border-color:var(--danger); box-shadow:0 20px 55px rgba(0,0,0,.48),0 0 28px rgba(255,79,110,.18); }
+.announcement-banner.success{ border-color:var(--ok); }
+.announcement-banner strong{ display:block; font-size:14px; margin-bottom:6px; }
+.announcement-banner p{ margin:0; color:var(--text-muted); font-size:12.5px; line-height:1.5; }
+.announcement-dismiss{ position:absolute; top:10px; right:12px; background:none; border:0; color:var(--text-dim); cursor:pointer; font-size:18px; }
+.announcement-dismiss:hover{ color:var(--text); }
+.maintenance-banner{ margin:0 0 18px; padding:14px 18px; border:1px solid var(--warn); border-radius:12px; color:var(--warn); background:rgba(255,184,79,.08); box-shadow:0 0 24px rgba(255,184,79,.1); font-size:13px; animation:announcement-in .45s ease both; }
+@keyframes announcement-in{from{opacity:0;transform:translateY(-12px) scale(.98)}to{opacity:1;transform:none}}
+
 /* ---------- Watermark ---------- */
 
 .watermark{

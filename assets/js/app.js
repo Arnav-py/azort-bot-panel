@@ -3,6 +3,7 @@
 let currentBots = [];
 let activeBotId = null;
 let cooldownTimer = null;
+let maintenanceMode = false;
 
 function showToast(msg, type = 'ok') {
   const t = document.getElementById('toast');
@@ -56,6 +57,9 @@ async function loadBots() {
     }
     const data = await res.json();
     currentBots = data.bots || [];
+    maintenanceMode = Boolean(data.maintenance?.maintenanceMode);
+    renderMaintenance(data.maintenance);
+    loadAnnouncements();
 
     document.getElementById('userName').textContent = data.user?.displayName || data.user?.username || '—';
     document.getElementById('userInitial').textContent = (data.user?.displayName || data.user?.username || '?')[0].toUpperCase();
@@ -124,14 +128,55 @@ function openDrawer(botId) {
   document.getElementById('drawerDiskUsed').textContent = details.diskUsed ? fmtBytes(details.diskUsed) : '—';
   document.getElementById('drawerDiskLimit').textContent = details.diskLimit ? `${fmtBytes(details.diskLimit * 1024 * 1024)} limit` : '—';
   ['startBtn', 'restartBtn', 'stopBtn'].forEach(id => { document.getElementById(id).disabled = false; });
-  document.getElementById('startBtn').disabled = bot.status === 'online';
-  document.getElementById('stopBtn').disabled = bot.status === 'offline';
+  document.getElementById('startBtn').disabled = maintenanceMode || bot.status === 'online';
+  document.getElementById('restartBtn').disabled = maintenanceMode;
+  document.getElementById('stopBtn').disabled = maintenanceMode || bot.status === 'offline';
   document.getElementById('drawerStatusText').textContent = statusLabel(bot.status);
   document.getElementById('drawerStatusText').className = `status-text ${bot.status}`;
   renderPulse(document.getElementById('drawerPulse'), bot.status);
   document.getElementById('cooldownNote').textContent = '';
 
   document.getElementById('overlay').classList.add('show');
+}
+
+function renderMaintenance(settings) {
+  const existing = document.getElementById('maintenanceBanner');
+  if (existing) existing.remove();
+  if (!settings?.maintenanceMode) return;
+  const banner = document.createElement('div');
+  banner.id = 'maintenanceBanner';
+  banner.className = 'maintenance-banner';
+  banner.textContent = settings.maintenanceMessage || 'Server controls are temporarily disabled during maintenance.';
+  document.querySelector('.client-hero').prepend(banner);
+}
+
+async function loadAnnouncements() {
+  try {
+    const res = await fetch('/api/announcements');
+    if (!res.ok) return;
+    const data = await res.json();
+    const stack = document.getElementById('announcementStack');
+    stack.innerHTML = '';
+    (data.announcements || []).forEach(item => {
+      const banner = document.createElement('article');
+      banner.className = `announcement-banner ${item.tone || 'info'}`;
+      const title = document.createElement('strong');
+      title.textContent = item.title;
+      const message = document.createElement('p');
+      message.textContent = item.message;
+      const dismiss = document.createElement('button');
+      dismiss.className = 'announcement-dismiss';
+      dismiss.type = 'button';
+      dismiss.setAttribute('aria-label', 'Dismiss announcement');
+      dismiss.textContent = '×';
+      dismiss.addEventListener('click', async () => {
+        await fetch('/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: item.id }) });
+        banner.remove();
+      });
+      banner.append(title, message, dismiss);
+      stack.appendChild(banner);
+    });
+  } catch { /* Announcements should never block the dashboard. */ }
 }
 
 function closeDrawer() {

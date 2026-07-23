@@ -4,6 +4,12 @@ const {
   hashPassword, genTempPassword,
 } = require('../lib/store');
 
+async function recordAudit(action, target) {
+  const audit = await readJSON('audit-log.json') || [];
+  audit.unshift({ id: 'audit_' + crypto.randomBytes(5).toString('hex'), at: new Date().toISOString(), actor: 'admin', action, target });
+  await writeJSON('audit-log.json', audit.slice(0, 500));
+}
+
 function requireAdmin(req, res) {
   const session = readSessionCookie(req, 'azort_admin_session');
   if (!session || session.role !== 'admin') {
@@ -65,6 +71,7 @@ module.exports = async (req, res) => {
 
     await writeJSON('users.json', users);
     await writeJSON('bots.json', bots);
+    await recordAudit('client-created', username);
 
     return res.status(201).json({ ok: true, tempPassword: plainPass });
   }
@@ -100,6 +107,7 @@ module.exports = async (req, res) => {
 
     await writeJSON('users.json', users);
     await writeJSON('bots.json', bots);
+    await recordAudit('client-updated', user.username);
 
     return res.status(200).json({ ok: true });
   }
@@ -114,6 +122,7 @@ module.exports = async (req, res) => {
     const plainPass = genTempPassword();
     user.passwordHash = hashPassword(plainPass);
     await writeJSON('users.json', users);
+    await recordAudit('password-reset', user.username);
 
     return res.status(200).json({ ok: true, tempPassword: plainPass });
   }

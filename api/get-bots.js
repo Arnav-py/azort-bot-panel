@@ -10,6 +10,7 @@ module.exports = async (req, res) => {
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
 
   const allBots = await readJSON('bots.json') || [];
+  const maintenance = await readJSON('admin-settings.json') || { maintenanceMode: false };
 
   // CRITICAL: filter server-side by session userId. Never trust a userId or
   // serverId supplied by the client for this lookup — this is the boundary
@@ -38,5 +39,6 @@ module.exports = async (req, res) => {
   return res.status(200).json({
     user: { username: user.username, displayName: user.displayName },
     bots: enriched,
+    maintenance,
   });
 };

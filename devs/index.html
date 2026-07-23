@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azort Devs — Sign In</title>
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-mark">A</div>
+    <h1 class="auth-title">Devs access</h1>
+    <p class="auth-sub">Internal admin panel — Azort Development.</p>
+
+    <div class="form-error" id="loginError"></div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="username">Admin username</label>
+        <input type="text" id="username" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="current-password" required>
+      </div>
+      <div class="btn-row">
+        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Sign in</button>
+      </div>
+    </form>
+
+    <p class="form-note">Restricted area. Access is logged.</p>
+  </div>
+</div>
+
+<div class="watermark"><span class="dot"></span>Azort Development&nbsp;&nbsp;|&nbsp;&nbsp;Built by <b>Arnav</b></div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const errBox = document.getElementById('loginError');
+  errBox.classList.remove('show');
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  try {
+    const res = await fetch('/api/devs-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.getElementById('username').value.trim(),
+        password: document.getElementById('password').value
+      })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      errBox.textContent = data.error || 'Invalid credentials.';
+      errBox.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+      return;
+    }
+
+    window.location.href = '/devs/dashboard.html';
+  } catch (err) {
+    errBox.textContent = 'Something went wrong. Please try again.';
+    errBox.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Sign in';
+  }
+});
+</script>
+</body>
+</html>

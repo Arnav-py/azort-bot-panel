@@ -1,7 +1,7 @@
 [
-  {
-    "id": "a_arnav",
-    "username": "arnav",
-    "passwordHash": "REPLACE_Wc26cd4a23d3d1e4d2a23efa6700f7d00:b9bcb14d18ad22155b8b15a9d2a74bc5edad2010a6f752e70e806c53a18ef4d3432c5308e6eff912cd734b20c979e061f4ffc5ec87ce1da9fc2e8815af5f9a9ITH_HASH"
-  }
-]
+    {
+        "id": "a_arnav",
+            "username": "arnav",
+                "passwordHash": "c26cd4a23d3d1e4d2a23efa6700f7d00:b9bcb14d18ad22155b8b15a9d2a74bc5edad2010a6f752e70e806c53a18ef4d3432c5308e6eff912cd734b20c979e061f4ffc5ec87ce1da9fc2e8815af5f9a9"
+                  }
+                  ]

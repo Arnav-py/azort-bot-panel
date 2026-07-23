@@ -1,4 +1,4 @@
-const { readJSON, writeJSON, verifyPassword, createSessionCookie } = require('../lib/store');
+const { readJSON, verifyPassword, createSessionCookie } = require('../lib/store');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -13,9 +13,6 @@ module.exports = async (req, res) => {
   if (!user || !verifyPassword(password, user.passwordHash)) {
     return res.status(401).json({ error: 'Invalid username or password.' });
   }
-
-  user.lastLogin = new Date().toISOString();
-  writeJSON('users.json', users);
 
   const cookie = createSessionCookie('azort_session', { userId: user.id, role: 'client' });
   res.setHeader('Set-Cookie', cookie);

@@ -54,7 +54,7 @@ function renderClients() {
     <tr>
       <td><strong>${c.username}</strong><div style="color:var(--text-dim);font-size:11px">${c.lastLogin ? `Last login ${fmtDate(c.lastLogin)}` : 'Never logged in'}</div></td>
       <td><div class="client-server-list">${(c.bots || []).map(bot => `
-        <div class="admin-server-card">
+        <div class="admin-server-entry">
           <input class="server-select" type="checkbox" data-select-server="${bot.id}" aria-label="Select ${bot.name}">
           <button class="admin-server-card" data-server="${encodeURIComponent(JSON.stringify({ ...bot, clientName: c.username, clientId: c.id, note: c.notes || '' }))}">
             <span><strong>${bot.name}</strong><span>${bot.status || 'offline'} · ${bot.plan || 'Standard'}</span></span><b class="admin-server-arrow">&rarr;</b>

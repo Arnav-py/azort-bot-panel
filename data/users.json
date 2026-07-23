@@ -2,7 +2,8 @@
   {
     "id": "u_demo1",
     "username": "demoClient",
-    "passwordHash": "REPLACE_WITH_HASH",
-    "displayName": "Demo Client"
+    "passwordHash": "22d5de77e7768b74107c98244c872c79:791a698af0e3a21d6b6202f50c76ea8d7b5840f209f6535bb3143a3f6159dd690c6fca9082def83e91670c502e1695b7f937f2a5d35039795d23f04e5a844390",
+    "displayName": "Demo Client",
+    "lastLogin": "2026-07-23T13:21:55.270Z"
   }
 ]

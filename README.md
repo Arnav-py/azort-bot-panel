@@ -35,7 +35,8 @@ without a database or always-on server.
   admins.json   → your own devs login
 
 /scripts
-  hash-password.js  → CLI to generate a password hash for seeding data files
+  set-password.js    → Set an account password without handling hashes
+  hash-passwords.js  → CLI to generate a password hash when needed
 ```
 
 ## Setup
@@ -45,12 +46,12 @@ without a database or always-on server.
    - `SESSION_SECRET` — any long random string (`openssl rand -hex 32`)
    - `PTERODACTYL_BASE_URL` — your Orihost panel URL
    - `PTERODACTYL_API_KEY` — your master Pterodactyl **Client API** key
-3. **Set your own admin login.** Generate a password hash:
+3. **Set your own admin login.** Use your normal password; the helper hashes it automatically:
    ```
-   node scripts/hash-password.js "yourRealPassword"
+  node scripts/set-password.js admins arnav "yourRealPassword"
    ```
-   Paste the output into `data/admins.json` → `passwordHash`, and change
-   `username` to whatever you want to log in as at `/devs`.
+  Replace `arnav` with the username in `data/admins.json`. Log in at `/devs`
+  using that username and the normal password you supplied.
 4. **Delete the demo client** in `data/users.json` and `data/bots.json` (or
    just add real clients through the `/devs` panel once it's running — it
    generates the user + a temp password for you).
@@ -58,6 +59,18 @@ without a database or always-on server.
 6. **Deploy**: push this repo to GitHub, then `vercel --prod` or import the
    repo in the Vercel dashboard. Set the same env vars there under
    Project Settings → Environment Variables.
+
+### Changing a password
+
+Use the same command for an existing admin or client account:
+
+```
+node scripts/set-password.js admins arnav "newPassword"
+node scripts/set-password.js users clientUsername "newPassword"
+```
+
+Passwords are entered normally, but only a one-way hash is saved in the data
+files. Never replace `passwordHash` with a plaintext password.
 
 ## Important: persistent storage on Vercel
 

@@ -1,12 +1,12 @@
 /**
- * Usage: node scripts/hash-password.js "theirPassword"
+ * Usage: node scripts/hash-passwords.js "theirPassword"
  * Copy the output into data/users.json or data/admins.json as "passwordHash".
  */
 const { hashPassword } = require('../lib/store');
 
 const plain = process.argv[2];
 if (!plain) {
-  console.error('Usage: node scripts/hash-password.js "somePassword"');
+  console.error('Usage: node scripts/hash-passwords.js "somePassword"');
   process.exit(1);
 }
 

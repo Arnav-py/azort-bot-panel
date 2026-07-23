@@ -1,0 +1,14 @@
+[
+  {
+    "id": "b_demo1",
+    "userId": "u_demo1",
+    "name": "Demo Bot",
+    "serverId": "your-pterodactyl-server-id",
+    "plan": "Standard",
+    "expiresAt": "2026-12-01",
+    "cpuLimit": 100,
+    "memLimit": 512,
+    "status": "offline",
+    "lastAction": null
+  }
+]

@@ -1,0 +1,8 @@
+[
+  {
+    "id": "u_demo1",
+    "username": "demoClient",
+    "passwordHash": "REPLACE_WITH_HASH",
+    "displayName": "Demo Client"
+  }
+]

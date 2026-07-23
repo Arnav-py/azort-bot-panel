@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   const signal = ALLOWED_ACTIONS[action];
   if (!botId || !signal) return res.status(400).json({ error: 'Invalid request.' });
 
-  const bots = readJSON('bots.json') || [];
+  const bots = await readJSON('bots.json') || [];
   const bot = bots.find(b => b.id === botId);
 
   // CRITICAL AUTHORIZATION CHECK:
@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
   // Update last-action record (see note in lib/store.js re: persistent storage on Vercel)
   bot.lastAction = `${action === 'restart' ? 'Restart' : 'Stop'} — ${new Date().toISOString()}`;
   bot.status = action === 'restart' ? 'restarting' : 'offline';
-  writeJSON('bots.json', bots);
+  await writeJSON('bots.json', bots);
 
   return res.status(200).json({ ok: true });
 };

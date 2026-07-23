@@ -5,11 +5,11 @@ module.exports = async (req, res) => {
   const session = readSessionCookie(req, 'azort_session');
   if (!session || session.role !== 'client') return res.status(401).json({ error: 'Not signed in.' });
 
-  const users = readJSON('users.json') || [];
+  const users = await readJSON('users.json') || [];
   const user = users.find(u => u.id === session.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
 
-  const allBots = readJSON('bots.json') || [];
+  const allBots = await readJSON('bots.json') || [];
 
   // CRITICAL: filter server-side by session userId. Never trust a userId or
   // serverId supplied by the client for this lookup — this is the boundary

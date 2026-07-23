@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) return res.status(400).json({ error: 'Username and password are required.' });
 
-  const admins = readJSON('admins.json') || [];
+  const admins = await readJSON('admins.json') || [];
   const admin = admins.find(a => a.username.toLowerCase() === String(username).toLowerCase());
 
   if (!admin || !verifyPassword(password, admin.passwordHash)) {

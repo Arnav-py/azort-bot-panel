@@ -46,6 +46,10 @@ without a database or always-on server.
    - `SESSION_SECRET` — any long random string (`openssl rand -hex 32`)
    - `PTERODACTYL_BASE_URL` — your Orihost panel URL
    - `PTERODACTYL_API_KEY` — your master Pterodactyl **Client API** key
+   - `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (or Vercel's
+     `KV_REST_API_URL` and `KV_REST_API_TOKEN`) — create a free Upstash Redis
+     database and copy its REST credentials. These are required for admin
+     edits to persist on Vercel.
 3. **Set your own admin login.** Use your normal password; the helper hashes it automatically:
    ```
   node scripts/set-password.js admins arnav "yourRealPassword"
@@ -59,6 +63,12 @@ without a database or always-on server.
 6. **Deploy**: push this repo to GitHub, then `vercel --prod` or import the
    repo in the Vercel dashboard. Set the same env vars there under
    Project Settings → Environment Variables.
+
+On the first deployment with Upstash configured, copy the contents of
+`data/admins.json`, `data/users.json`, and `data/bots.json` into the matching
+Redis keys `azort:admins.json`, `azort:users.json`, and `azort:bots.json`.
+The application reads those keys in production and uses local JSON files only
+when the Redis variables are absent.
 
 ### Changing a password
 

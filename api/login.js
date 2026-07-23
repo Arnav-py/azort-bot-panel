@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) return res.status(400).json({ error: 'Username and password are required.' });
 
-  const users = readJSON('users.json') || [];
+  const users = await readJSON('users.json') || [];
   const user = users.find(u => u.username.toLowerCase() === String(username).toLowerCase());
 
   // Same error for "no such user" and "wrong password" — don't leak which one it was.

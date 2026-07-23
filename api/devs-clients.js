@@ -23,8 +23,8 @@ module.exports = async (req, res) => {
   const session = requireAdmin(req, res);
   if (!session) return;
 
-  const users = readJSON('users.json') || [];
-  const bots = readJSON('bots.json') || [];
+  const users = await readJSON('users.json') || [];
+  const bots = await readJSON('bots.json') || [];
 
   if (req.method === 'GET') {
     const clients = users.map(u => {
@@ -74,8 +74,8 @@ module.exports = async (req, res) => {
       lastAction: null,
     });
 
-    writeJSON('users.json', users);
-    writeJSON('bots.json', bots);
+    await writeJSON('users.json', users);
+    await writeJSON('bots.json', bots);
 
     return res.status(201).json({ ok: true, tempPassword: plainPass });
   }
@@ -93,8 +93,8 @@ module.exports = async (req, res) => {
     }
     user.suspended = status === 'expired';
 
-    writeJSON('users.json', users);
-    writeJSON('bots.json', bots);
+    await writeJSON('users.json', users);
+    await writeJSON('bots.json', bots);
 
     return res.status(200).json({ ok: true });
   }
@@ -108,7 +108,7 @@ module.exports = async (req, res) => {
 
     const plainPass = genTempPassword();
     user.passwordHash = hashPassword(plainPass);
-    writeJSON('users.json', users);
+    await writeJSON('users.json', users);
 
     return res.status(200).json({ ok: true, tempPassword: plainPass });
   }

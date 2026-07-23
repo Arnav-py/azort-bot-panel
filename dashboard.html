@@ -3,131 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Azort Devs — Client Management</title>
+<title>Azort Control Panel</title>
 <link rel="stylesheet" href="/assets/css/style.css">
 <style>
-  .table-wrap{ overflow-x:auto; }
-  table{ width:100%; border-collapse:collapse; font-size:13.5px; }
-  th{ text-align:left; padding:10px 14px; color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--border); }
-  td{ padding:13px 14px; border-bottom:1px solid var(--border); vertical-align:middle; }
-  tr:last-child td{ border-bottom:none; }
-  tr:hover td{ background:rgba(46,107,255,0.04); }
-  .badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:100px; font-size:11.5px; font-weight:600; }
-  .badge.active{ background:rgba(47,230,168,0.12); color:var(--ok); }
-  .badge.expired{ background:rgba(255,79,110,0.12); color:var(--danger); }
-  .row-actions{ display:flex; gap:8px; }
-  .row-actions button{ font-size:12px; padding:6px 12px; }
-  .modal-grid .field{ margin-bottom:14px; }
-  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .add-bar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  body.client-page{background:#000}
+  .welcome-screen{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:#000;animation:welcome-out .7s ease 1.2s forwards;pointer-events:none}
+  .welcome-screen h1{color:#fff;font-size:clamp(30px,6vw,64px);letter-spacing:0;animation:welcome-in .6s ease both}
+  .welcome-screen p{color:#777;text-align:center;margin:12px 0 0}
+  .client-page .app-shell{opacity:0;animation:page-in .7s ease .8s forwards}
+  .client-hero{padding:28px 0 22px}
+  .bot-grid{margin-top:18px}
+  @keyframes welcome-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  @keyframes welcome-out{to{opacity:0;visibility:hidden}}
+  @keyframes page-in{to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.welcome-screen,.welcome-screen h1,.client-page .app-shell{animation:none}.welcome-screen{display:none}.client-page .app-shell{opacity:1}}
 </style>
 </head>
-<body>
-
-<div class="app-shell">
-
-  <div class="topbar">
-    <div class="brand">
-      <div class="brand-mark">A</div>
-      <div class="brand-text">
-        <div class="name">Azort Devs</div>
-        <div class="sub">Client & server management</div>
-      </div>
-    </div>
-    <div class="nav-right">
-      <div class="user-chip">
-        <div class="avatar">AR</div>
-        <span>Admin</span>
-      </div>
-      <button class="btn-ghost" id="logoutBtn">Sign out</button>
-    </div>
-  </div>
-
-  <div class="add-bar">
-    <div>
-      <h2 class="page-title" style="font-size:22px;">Clients</h2>
-      <p class="page-sub" style="margin-bottom:0;">Manage access, server assignments, and expiry.</p>
-    </div>
-    <button class="btn btn-primary" id="addClientBtn">+ Add client</button>
-  </div>
-
-  <div class="card">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Client</th>
-            <th>Bot / Server ID</th>
-            <th>Status</th>
-            <th>Expires</th>
-            <th>Last login</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="clientsBody">
-          <!-- populated by JS -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
-
-<!-- Add / Edit client modal -->
-<div class="overlay" id="overlay">
-  <div class="drawer">
-    <div class="drawer-top">
-      <h3 id="modalTitle">Add client</h3>
-      <button class="drawer-close" id="modalClose">&times;</button>
-    </div>
-
-    <form id="clientForm" class="modal-grid">
-      <input type="hidden" id="clientId">
-
-      <div class="field">
-        <label>Client username</label>
-        <input type="text" id="cUsername" required>
-      </div>
-
-      <div class="field">
-        <label>Bot / display name</label>
-        <input type="text" id="cBotName" required placeholder="e.g. Nifty Exchanges Bot">
-      </div>
-
-      <div class="field">
-        <label>Orihost server ID</label>
-        <input type="text" id="cServerId" required placeholder="Pterodactyl server identifier">
-      </div>
-
-      <div class="two-col">
-        <div class="field">
-          <label>Access expires</label>
-          <input type="date" id="cExpiry">
-        </div>
-        <div class="field">
-          <label>Status</label>
-          <select id="cStatus" style="width:100%; background:var(--bg-alt); border:1px solid var(--border); border-radius:10px; padding:12px 14px; color:var(--text); font-size:14px;">
-            <option value="active">Active</option>
-            <option value="expired">Expired / suspended</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="field" id="tempPassWrap">
-        <label>Temporary password</label>
-        <input type="text" id="cTempPass" placeholder="Auto-generated if left blank">
-      </div>
-
-      <div class="btn-row">
-        <button type="submit" class="btn btn-primary btn-block">Save client</button>
-      </div>
-    </form>
-  </div>
-</div>
-
+<body class="client-page">
+<div class="welcome-screen" aria-hidden="true"><div><h1>Welcome to Azort</h1><p>Your control panel is loading</p></div></div>
+<main class="app-shell">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">A</div><div class="brand-text"><div class="name">Azort Control Panel</div><div class="sub">Your hosted bots</div></div></div>
+    <div class="nav-right"><div class="user-chip"><div class="avatar" id="userInitial">?</div><span id="userName">Loading...</span></div><button class="btn-ghost" id="logoutBtn">Sign out</button></div>
+  </header>
+  <section class="client-hero"><div class="section-label">Overview</div><h1 class="page-title">Your bots</h1><p class="page-sub">Choose a bot to view its status and control it.</p><div class="bot-grid" id="botGrid"></div></section>
+</main>
+<div class="overlay" id="overlay"><div class="drawer">
+  <div class="drawer-top"><h3 id="drawerName">Bot</h3><button class="drawer-close" id="drawerClose">&times;</button></div>
+  <div class="status-row"><div class="pulse" id="drawerPulse"><div class="pulse-ring"></div><div class="pulse-ring"></div><div class="pulse-dot"></div></div><span class="status-text" id="drawerStatusText">Offline</span></div>
+  <div class="bot-meta"><span>Server <strong class="mono" id="drawerId">-</strong></span><span>Expires <strong id="drawerExpiry">-</strong></span></div>
+  <div class="two-col" style="margin-top:22px"><div class="card"><div class="section-label">CPU</div><strong id="drawerCpu">-</strong></div><div class="card"><div class="section-label">Memory</div><strong id="drawerMem">-</strong></div></div>
+  <p class="form-note" id="cooldownNote"></p><div class="btn-row"><button class="btn btn-primary" id="restartBtn">Restart bot</button><button class="btn-ghost" id="stopBtn">Stop bot</button></div>
+</div></div>
 <div class="toast" id="toast"></div>
 <div class="watermark"><span class="dot"></span>Azort Development&nbsp;&nbsp;|&nbsp;&nbsp;Built by <b>Arnav</b></div>
-
-<script src="/devs/assets/js/devs.js"></script>
+<script src="/assets/js/app.js"></script>
 </body>
 </html>

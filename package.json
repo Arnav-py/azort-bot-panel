@@ -1,0 +1,13 @@
+{
+  "name": "azort-control-panel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Azort Development — client bot control panel + devs admin panel for Orihost (Pterodactyl).",
+  "scripts": {
+    "dev": "vercel dev",
+    "hash": "node scripts/hash-password.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

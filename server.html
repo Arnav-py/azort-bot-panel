@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azort Control Panel — Server</title>
+<link rel="stylesheet" href="/assets/css/style.css">
+<style>
+  .back-link{ display:inline-flex; align-items:center; gap:6px; color:var(--text-muted); font-size:13px; text-decoration:none; margin-bottom:18px; transition:color .2s; }
+  .back-link:hover{ color:var(--cyan); }
+  .server-hero{ display:flex; justify-content:space-between; align-items:flex-start; gap:24px; flex-wrap:wrap; margin-bottom:26px; }
+  .server-hero h1{ font-size:32px; margin:6px 0 8px; font-family:var(--font-display); letter-spacing:-.02em; }
+  .detail-section{ margin-top:26px; }
+  .detail-section h2{ font-size:15px; font-family:var(--font-display); margin-bottom:14px; }
+  .billing-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:700px){ .billing-grid, .admin-detail-grid{ grid-template-columns:1fr 1fr !important; } }
+  .info-item{ padding:18px; background:var(--panel-alt); border:1px solid var(--border); border-radius:12px; }
+  .info-item strong{ display:block; font-size:19px; margin-top:8px; color:var(--text); }
+</style>
+</head>
+<body>
+<main class="app-shell">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">A</div><div class="brand-text"><div class="name">Azort Control Panel</div><div class="sub">Server details</div></div></div>
+    <div class="nav-right"><div class="user-chip"><div class="avatar" id="userInitial">?</div><span id="userName">Loading...</span></div><button class="btn-ghost" id="logoutBtn">Sign out</button></div>
+  </header>
+
+  <a href="/dashboard.html" class="back-link">&larr; Back to your bots</a>
+
+  <div id="content">
+    <p class="page-sub">Loading server details…</p>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+<div class="watermark"><span class="dot"></span>Azort Development&nbsp;&nbsp;|&nbsp;&nbsp;Built by <b>Arnav</b></div>
+<script src="/assets/js/app.js"></script>
+<script src="/assets/js/server.js"></script>
+</body>
+</html>
